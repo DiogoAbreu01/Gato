@@ -2,6 +2,8 @@
 
 Sistema de gestão administrativa de Atléticas universitárias. Código independente do BlueScale, com Next.js, React, TypeScript, Prisma e PostgreSQL.
 
+**Prévia hospedada externamente (Render Free + Neon): https://gato-atletica-os.onrender.com** — app e banco conectados, verificado por `/api/health` em 22/11/2026. Ainda falta inicializar o primeiro administrador para permitir login real; uploads locais estão desativados por não haver disco persistente. Veja `DEPLOY_RENDER.md`.
+
 ## Estado desta entrega
 
 **Base de desenvolvimento, não certificada para produção.** Possui autenticação por sessão, usuários administrativos e papéis, gerenciamento de membros (múltiplas diretorias), eventos, tarefas, movimentações financeiras com estornos, agenda editorial, equipes e campeonatos, projetos, documentos com upload privado, ocorrências com ajustes auditáveis, notificações, calendário global e dashboard. A migração inicial já foi aplicada à Neon e confirmada em 22/11/2026; testes integrados passaram no GitHub Actions com PostgreSQL efêmero. **A aplicação ainda depende de VM Oracle, credenciais privadas, bootstrap e testes end-to-end na Neon de produção.** Consulte `STATUS.md`.

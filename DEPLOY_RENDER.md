@@ -5,8 +5,12 @@
 - Render: serviço Web `gato-atletica-os`, plano **Free**, runtime Docker, região Virginia, branch GitHub `main`, URL `https://gato-atletica-os.onrender.com`.
 - Banco: projeto Neon **Gato**, org Gato Atletica, branch `production`, região São Paulo. Não usar Render Postgres.
 - Dockerfile: Next.js standalone + Prisma 6, Node 22; sem servidor ou banco rodando permanentemente no PC pessoal.
-- Configure `DATABASE_URL` no **Environment** do Render com a string pooled de Neon (com `sslmode=require`). `APP_URL` deve ser a URL HTTPS acima; `SESSION_COOKIE_NAME=gato_session`. Nunca suba credenciais para GitHub.
-- O esquema SQL e `_prisma_migrations` já estão aplicados no Neon (23 modelos, 1 tabela de migrations), mas o primeiro administrador deve ser provisionado separadamente e o login validado.
+- `DATABASE_URL` pooled da Neon configurada e salva no **Environment** privativo do Render, com TLS obrigatório. `APP_URL` e `SESSION_COOKIE_NAME` configuradas. Nenhuma credencial foi enviada ao GitHub.
+- O esquema SQL e `_prisma_migrations` já estão aplicados no Neon (23 modelos, 1 tabela de migrations); sete diretorias e dez categorias financeiras criadas. O primeiro administrador deve ser provisionado separadamente e o login completo validado.
+
+## Verificação operacional concluída
+
+Em 2026-11-22, o Render confirmou o deploy `dep-dc1mf96tlv9c73cghkrg` no commit `aee3c0c` como live. Testes HTTP independentes: `/` redireciona (307), `/login` (200), `/api/health` (200 com `database: connected`), `/api/auth/me` e `/api/records/members` sem sessão (401). O código usa `HOSTNAME=0.0.0.0` para aceitar tráfego externo via Docker. O login autenticado ainda não foi validado porque não há administrador inicial no banco de produção.
 
 ## Limitações que impedem tratar o Free como produção institucional
 
