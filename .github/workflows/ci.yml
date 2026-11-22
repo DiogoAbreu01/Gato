@@ -1,4 +1,4 @@
-name: Validar Atlética OS
+name: Validar Gato
 on:
   push:
   pull_request:
@@ -34,6 +34,11 @@ jobs:
       - run: npx prisma validate
       - run: npx prisma generate
       - run: npm run typecheck
+      - name: Validar Docker Compose para Oracle + Neon
+        run: docker compose config --quiet
+        env:
+          DOMAIN: gato.example.invalid
+          APP_URL: https://gato.example.invalid
       - run: npm test
       - run: npx prisma migrate deploy
       - run: npm run db:bootstrap

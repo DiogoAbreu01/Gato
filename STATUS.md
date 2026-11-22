@@ -9,15 +9,15 @@ Next.js 16 + React 19 + TypeScript; Prisma 6.19 e migração PostgreSQL com 23 m
 - prisma generate concluído, Prisma schema validado.
 - npm run typecheck concluído (exit 0).
 - npm run lint concluído (exit 0; dois avisos não bloqueantes).
-- npm test: 9 aprovados, 1 integração **ignorada** por depender de aplicação + PostgreSQL conectados.
+- npm test local: 9 aprovados, 1 integração ignorada localmente. GitHub Actions no commit 5e36be3 executou PostgreSQL 16 efêmero na nuvem, prisma migrate deploy, bootstrap, build e smoke HTTP (RUN_SMOKE=1) com aprovação observada nos passos do workflow 45069694924.
 - npm run build com Webpack concluído (exit 0, Next 16.1.0). Turbopack no Windows falhou por falta de privilégio de symlink; Webpack resolveu.
 - Corrigidos filtros de tipagem e acesso aos metadados de eventos.
 
 ## Infraestrutura externa
 - Neon Postgres **realmente criado**: projeto Gato, organização Gato Atletica, região São Paulo, plano Free, branch production. Projeto ID still-silence-30598056. Nenhuma URL de conexão com senha foi comitada.
-- Docker Compose Oracle + Neon em deploy/compose.cloud.yaml; PostgreSQL permanece na Neon, nunca no PC.
+- Docker Compose Oracle + Neon em compose.yaml (padrão) e deploy/compose.cloud.yaml; **nenhum** deles inclui PostgreSQL local. Banco de produção deve permanecer na Neon, nunca no PC.
 - Oracle VM ainda **NÃO provisionada** e o Gato ainda **NÃO está online**.
-- Credenciais Neon ainda não conectadas ao app; migrações, bootstrap, login e CRUD HTTP NÃO testados contra banco real.
+- Credenciais Neon ainda não conectadas ao app. Migrações, bootstrap, login e CRUD HTTP foram testados com banco PostgreSQL real **somente no ambiente efêmero do GitHub Actions**, não no projeto Neon e não na Oracle.
 
 ## Prioridades
 1. Conexão segura do aplicativo ao Neon (segredos só no ambiente de produção) e executar prisma migrate deploy/ bootstrap.

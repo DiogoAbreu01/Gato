@@ -6,35 +6,36 @@ Sistema de gestão administrativa de Atléticas universitárias. Código indepen
 
 **Base de desenvolvimento, não certificada para produção.** Possui autenticação por sessão, usuários administrativos e papéis, gerenciamento de membros (múltiplas diretorias), eventos, tarefas, movimentações financeiras com estornos, agenda editorial, equipes e campeonatos, projetos, documentos com upload privado, ocorrências com ajustes auditáveis, notificações, calendário global e dashboard. O funcionamento completo depende de instalação, migração e testes integrados. Consulte `STATUS.md`.
 
-## Rodar localmente
+## Ambiente de desenvolvimento (somente código e testes, sem hospedar bancos no PC)
 
-Requisitos: Node.js 22, PostgreSQL 16, npm. No diretório do projeto:
+Requisitos: Node.js 22, npm e um banco PostgreSQL **externo**. Não execute serviço ou banco persistente no PC de desenvolvimento. No diretório do projeto:
 
 ```bash
-cp .env.example .env
-# Edite DATABASE_URL, APP_URL, ADMIN_EMAIL e ADMIN_PASSWORD
-npm install
+npm ci
 npx prisma validate
 npx prisma generate
-npx prisma migrate deploy
-npm run db:bootstrap
-npm run dev
+npm run typecheck
+npm run lint
+npm test
+npm run build
 ```
 
-Abra `http://localhost:3000`. A conta inicial vem de `ADMIN_EMAIL` e `ADMIN_PASSWORD` (mínimo 16 caracteres) e nunca deve ser comitada. O bootstrap não redefine senha de administrador existente.
+Essas verificações não iniciam um servidor nem um banco persistente no PC. A conta inicial será criada **somente na VM** com `ADMIN_EMAIL` e `ADMIN_PASSWORD` (mínimo 16 caracteres); nunca registre credenciais no GitHub. O bootstrap não redefine a senha de um administrador existente.
 
-## Docker
+## Hospedagem definitiva: Oracle Cloud VM + Neon Postgres (sem banco no computador)
+
+Na VM Oracle, configure um `.env` privado contendo `DATABASE_URL` externo do Neon, `APP_URL=https://dominio`, `DOMAIN=dominio` e credenciais administrativas iniciais. O `compose.yaml` **não cria contêiner PostgreSQL**: usa exclusivamente o banco externo.
 
 ```bash
-cp .env.example .env
-# Defina POSTGRES_PASSWORD forte, APP_URL, ADMIN_EMAIL e ADMIN_PASSWORD
-# Use no DATABASE_URL uma senha URL-encoded, se contiver caracteres especiais.
-docker compose up -d --build
-# Só após a migração terminar:
-docker compose run --rm --no-deps migrate npm run db:bootstrap
+git clone https://github.com/DiogoAbreu01/Gato.git
+cd Gato
+# Configure .env privado na VM e DNS apontando para o IP público
+sudo docker compose --env-file .env up -d --build
+# Após a migration, bootstrap (uma vez, conta administrativa inicial):
+sudo docker compose --env-file .env run --rm --no-deps migrate npm run db:bootstrap
 ```
 
-Acesse via `http://localhost:3000` somente no próprio servidor. Para acesso remoto, configure um domínio e proxy HTTPS (veja `DEPLOYMENT.md`).
+Não exponha portas 3000/5432 à internet. O proxy Caddy usa 80/443 e HTTPS. Não execute este compose no PC; ele é o deploy da VM. A VM Oracle ainda precisa ser provisionada e validada. Veja `DEPLOYMENT.md` e `STATUS.md`.
 
 ## Testes
 

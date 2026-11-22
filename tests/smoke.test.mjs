@@ -28,4 +28,12 @@ test('integração real: login, criar, editar e histórico de concorrência', {s
  const reversed=await request(`/api/records/transactions/${money.body.record.id}`,'DELETE');assert.equal(reversed.status,200,JSON.stringify(reversed.body));assert.equal(reversed.body.record.kind,'EXPENSE');
  const twice=await request(`/api/records/transactions/${money.body.record.id}`,'DELETE');assert.equal(twice.status,409);
  const unauthorized=await fetch(new URL('/api/records/transactions',base));assert.equal(unauthorized.status,401);
+ const regularEmail=`gato-ci-${Date.now()}@example.invalid`;
+ const regularPassword='CI-Temporary-Password-2026-XYZ';
+ const regular=await request('/api/admin/users','POST',{name:'Membro Geral CI',email:regularEmail,password:regularPassword,globalRole:'GENERAL',departments:[]});assert.equal(regular.status,201,JSON.stringify(regular.body));
+ const regularLogin=await request('/api/auth/login','POST',{email:regularEmail,password:regularPassword});assert.equal(regularLogin.status,200);
+ cookie=regularLogin.headers.get('set-cookie')?.split(';')[0]||'';assert.ok(cookie.includes('atletica_session='));
+ const adminBlocked=await request('/api/admin/users');assert.equal(adminBlocked.status,403);
+ const financeBlocked=await request('/api/records/transactions');assert.equal(financeBlocked.status,403);
+ const eventBlocked=await request('/api/records/events','POST',{name:'Evento indevido CI',startsAt:new Date(Date.now()+86400000).toISOString(),status:'PLANNING',departmentId:dept.id});assert.equal(eventBlocked.status,403);
 });
