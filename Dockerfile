@@ -13,6 +13,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN groupadd -g 1001 nodeapp && useradd -r -u 1001 -g nodeapp nodeapp && mkdir -p /srv/atletica/storage && chown -R nodeapp:nodeapp /srv/atletica
 COPY --from=builder --chown=nodeapp:nodeapp /app/.next/standalone ./
