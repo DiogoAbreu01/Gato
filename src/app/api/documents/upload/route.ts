@@ -18,6 +18,7 @@ function validSignature(buffer:Buffer,type:string){
  return true;
 }
 export async function POST(req:NextRequest){
+ if(process.env.RENDER && process.env.PERSISTENT_UPLOADS!=='true')return bad('Uploads indisponíveis neste plano de hospedagem: o armazenamento local é temporário. Cadastre um link externo ou configure armazenamento persistente.',503);
  if(!sameOrigin(req))return bad('Origem inválida',403);
  const actor=await actorFromSession();if(!actor)return bad('Login necessário',401);
  const form=await req.formData().catch(()=>null);if(!form)return bad('Formulário inválido',400);

@@ -13,5 +13,5 @@ export async function GET(){
    can(actor,'members','read') ? prisma.member.findMany({where:{...readFilter(actor,'members'),archivedAt:null} as Prisma.MemberWhereInput,select:{id:true,name:true},take:500}) : Promise.resolve([]),
    actor.globalRole==='ADMIN'||actor.globalRole==='BOARD' ? prisma.user.findMany({where:{active:true},select:{id:true,name:true},take:500}) : prisma.user.findMany({where:{active:true,OR:[{id:actor.id},{departments:{some:{departmentId:{in:actor.departments.map(d=>d.departmentId)}}}}]},select:{id:true,name:true},take:500})
  ]);
- return NextResponse.json({actor,permissions:Object.fromEntries(ALL_RESOURCES.map(resource=>[resource,{read:can(actor,resource,'read'),write:can(actor,resource,'write'),manage:can(actor,resource,'manage')}])),departments,accounts,categories,events,members,users});
+ return NextResponse.json({uploadsEnabled:!process.env.RENDER||process.env.PERSISTENT_UPLOADS==='true',actor,permissions:Object.fromEntries(ALL_RESOURCES.map(resource=>[resource,{read:can(actor,resource,'read'),write:can(actor,resource,'write'),manage:can(actor,resource,'manage')}])),departments,accounts,categories,events,members,users});
 }
