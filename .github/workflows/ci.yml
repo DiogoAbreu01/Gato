@@ -1,0 +1,49 @@
+name: Validar Atlética OS
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: atletica
+          POSTGRES_PASSWORD: smokeonly
+          POSTGRES_DB: atletica
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atletica -d atletica"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://atletica:smokeonly@localhost:5432/atletica?schema=public
+      APP_URL: http://127.0.0.1:3000
+      ADMIN_EMAIL: admin@teste.local
+      ADMIN_PASSWORD: CI-Temp-Only-Password-2026-321
+      ADMIN_NAME: Teste
+      SMOKE_ADMIN_EMAIL: admin@teste.local
+      SMOKE_ADMIN_PASSWORD: CI-Temp-Only-Password-2026-321
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma validate
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx prisma migrate deploy
+      - run: npm run db:bootstrap
+      - run: npm run build
+      - name: Iniciar Next.js
+        run: |
+          npm run start -- -p 3000 > /tmp/atletica-next.log 2>&1 &
+          for i in {1..60}; do curl -fsS http://127.0.0.1:3000/api/health && exit 0; sleep 2; done
+          cat /tmp/atletica-next.log
+          exit 1
+      - run: npm run test
+        env:
+          RUN_SMOKE: '1'
