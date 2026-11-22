@@ -9,7 +9,7 @@ Next.js 16 + React 19 + TypeScript; Prisma 6.19 e migração PostgreSQL com 23 m
 - prisma generate concluído, Prisma schema validado.
 - npm run typecheck concluído (exit 0).
 - npm run lint concluído (exit 0; dois avisos não bloqueantes).
-- npm test local: 9 aprovados, 1 integração ignorada localmente. GitHub Actions no commit 5e36be3 executou PostgreSQL 16 efêmero na nuvem, prisma migrate deploy, bootstrap, build e smoke HTTP (RUN_SMOKE=1) com aprovação observada nos passos do workflow 45069694924.
+- npm test local: 9 aprovados, 1 integração ignorada localmente. GitHub Actions concluído com **sucesso** nos commits 5e36be3 (workflow 45069694924) e eda4d3f (workflow 45070109479): PostgreSQL 16 efêmero na nuvem, prisma migrate deploy, bootstrap, build, healthcheck, smoke HTTP (RUN_SMOKE=1) com login, CRUD, conflitos, estornos e bloqueios de um segundo usuário sem permissão.
 - npm run build com Webpack concluído (exit 0, Next 16.1.0). Turbopack no Windows falhou por falta de privilégio de symlink; Webpack resolveu.
 - Corrigidos filtros de tipagem e acesso aos metadados de eventos.
 
