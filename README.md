@@ -4,7 +4,7 @@ Sistema de gestão administrativa de Atléticas universitárias. Código indepen
 
 ## Estado desta entrega
 
-**Base de desenvolvimento, não certificada para produção.** Possui autenticação por sessão, usuários administrativos e papéis, gerenciamento de membros (múltiplas diretorias), eventos, tarefas, movimentações financeiras com estornos, agenda editorial, equipes e campeonatos, projetos, documentos com upload privado, ocorrências com ajustes auditáveis, notificações, calendário global e dashboard. O funcionamento completo depende de instalação, migração e testes integrados. Consulte `STATUS.md`.
+**Base de desenvolvimento, não certificada para produção.** Possui autenticação por sessão, usuários administrativos e papéis, gerenciamento de membros (múltiplas diretorias), eventos, tarefas, movimentações financeiras com estornos, agenda editorial, equipes e campeonatos, projetos, documentos com upload privado, ocorrências com ajustes auditáveis, notificações, calendário global e dashboard. A migração inicial já foi aplicada à Neon e confirmada em 22/11/2026; testes integrados passaram no GitHub Actions com PostgreSQL efêmero. **A aplicação ainda depende de VM Oracle, credenciais privadas, bootstrap e testes end-to-end na Neon de produção.** Consulte `STATUS.md`.
 
 ## Ambiente de desenvolvimento (somente código e testes, sem hospedar bancos no PC)
 
@@ -24,14 +24,14 @@ Essas verificações não iniciam um servidor nem um banco persistente no PC. A 
 
 ## Hospedagem definitiva: Oracle Cloud VM + Neon Postgres (sem banco no computador)
 
-Na VM Oracle, configure um `.env` privado contendo `DATABASE_URL` externo do Neon, `APP_URL=https://dominio`, `DOMAIN=dominio` e credenciais administrativas iniciais. O `compose.yaml` **não cria contêiner PostgreSQL**: usa exclusivamente o banco externo.
+Na VM Oracle, configure um `.env` privado contendo `DATABASE_URL` Neon com pooling, `DATABASE_URL_UNPOOLED` Neon direta, `APP_URL=https://dominio`, `DOMAIN=dominio` e credenciais administrativas iniciais. O `compose.yaml` **não cria contêiner PostgreSQL**: usa exclusivamente o banco externo.
 
 ```bash
 git clone https://github.com/DiogoAbreu01/Gato.git
 cd Gato
 # Configure .env privado na VM e DNS apontando para o IP público
 sudo docker compose --env-file .env up -d --build
-# Após a migration, bootstrap (uma vez, conta administrativa inicial):
+# A migration inicial já existe na Neon; bootstrap uma vez, com conta administrativa inicial:
 sudo docker compose --env-file .env run --rm --no-deps migrate npm run db:bootstrap
 ```
 

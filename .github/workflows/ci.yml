@@ -30,10 +30,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npx prisma validate
       - run: npx prisma generate
       - run: npm run typecheck
+      - name: Validar scripts de backup e restauracao da Oracle
+        run: bash -n scripts/backup.sh scripts/verify-restore.sh
       - name: Validar Docker Compose para Oracle + Neon
         run: docker compose config --quiet
         env:

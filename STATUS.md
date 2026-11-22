@@ -14,15 +14,15 @@ Next.js 16 + React 19 + TypeScript; Prisma 6.19 e migração PostgreSQL com 23 m
 - Corrigidos filtros de tipagem e acesso aos metadados de eventos.
 
 ## Infraestrutura externa
-- Neon Postgres **realmente criado**: projeto Gato, organização Gato Atletica, região São Paulo, plano Free, branch production. Projeto ID still-silence-30598056. Nenhuma URL de conexão com senha foi comitada.
+- Neon Postgres **criado e configurado**: projeto Gato, organização Gato Atletica, região São Paulo, plano Free, branch production, banco neondb. Projeto ID still-silence-30598056. Em 22/11/2026 a migração 20261110000000_init foi executada pelo SQL Editor da conta autenticada em uma transação; foram confirmadas 24 tabelas (23 modelos + _prisma_migrations). Checksum SHA256 registrado ae1025e121d596fad03a05fbdda5df268ee8f595e57a509ee6ebc8ee0bbba207; finished_at validado. Snapshot manual criado 2026-11-22T21:46:34Z no plano Free (sem agendamento, limite de 1 snapshot). Nenhuma URL de conexão com senha foi comitada.
 - Docker Compose Oracle + Neon em compose.yaml (padrão) e deploy/compose.cloud.yaml; **nenhum** deles inclui PostgreSQL local. Banco de produção deve permanecer na Neon, nunca no PC.
 - Oracle VM ainda **NÃO provisionada** e o Gato ainda **NÃO está online**.
-- Credenciais Neon ainda não conectadas ao app. Migrações, bootstrap, login e CRUD HTTP foram testados com banco PostgreSQL real **somente no ambiente efêmero do GitHub Actions**, não no projeto Neon e não na Oracle.
+- Neon possui esquema inicial e histórico da migração aplicados, porém a aplicação ainda NÃO se conecta à Neon de produção: sem credencial em VM Oracle. Bootstrap, login e CRUD HTTP foram testados com Postgres real **somente no ambiente efêmero do GitHub Actions**, não na Neon de produção nem na Oracle. O plugin Neon conectado no ChatGPT mostra apenas organização DAs (sem projetos); a aplicação de schema foi feita no projeto original Gato via navegador autenticado.
 
 ## Prioridades
-1. Conexão segura do aplicativo ao Neon (segredos só no ambiente de produção) e executar prisma migrate deploy/ bootstrap.
-2. Verificar teste de integração HTTP e múltiplos usuários, segurança, permissão e recursos financeiros.
-3. Provisionar Oracle Ubuntu ARM64 ou x86_64 com DNS e HTTPS, Docker Compose externo, backups remotos e teste de restauração.
+1. Provisionar VM Oracle e configurar DATABASE_URL de Neon (segredos apenas na VM); a migração inicial já está registrada como aplicada no banco de produção, mas deve ser verificada por Prisma migrate status. Executar bootstrap de administrador apenas na VM.
+2. Verificar teste de integração HTTP usando aplicação na Oracle + Neon de produção e testar múltiplos usuários, segurança, permissões, finanças e documentos privados.
+3. O console Oracle Cloud ainda pede o Cloud Account Name e não há login/sessão autorizada, nem VM provisionada; quando houver acesso, criar Ubuntu ARM64 ou x86_64 com DNS e HTTPS, Docker Compose externo, backups remotos e teste de restauração.
 4. Finalizar fluxos avançados de aprovação, busca e relatórios antes de declarar produção.
 
 Importante: o PC de Itajubá **não é servidor**, e nunca armazenará o banco de produção.

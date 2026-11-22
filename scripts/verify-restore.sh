@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-# Restaura SOMENTE em banco de verificação isolado, nunca no banco em uso.
+# Valida se um dump Postgres custom e um tar de uploads sao legiveis.
+# NAO substitui teste real de restauracao em branch isolada da Neon.
 set -Eeuo pipefail
-cd "$(dirname "$0")/.."
-FILE="${1:?Informe caminho para backup .dump}"
-[[ -f "$FILE" ]] || { echo "Arquivo não encontrado" >&2; exit 1; }
-TEST_DB="atletica_restore_$(date +%s)"
-docker compose exec -T db createdb -U atletica "$TEST_DB"
-cat "$FILE" | docker compose exec -T db pg_restore --no-owner --no-privileges -U atletica -d "$TEST_DB"
-docker compose exec -T db psql -U atletica -d "$TEST_DB" -c 'SELECT count(*) AS tabelas FROM information_schema.tables WHERE table_schema = '\''public'\'';'
-echo "Banco de verificação: $TEST_DB (não removido para inspeção)."
+FILE="${1:?Informe o caminho do arquivo .dump do PostgreSQL}"
+[[ -f "$FILE" && -s "$FILE" ]] || { echo "Dump ausente ou vazio" >&2; exit 2; }
+command -v docker >/dev/null || { echo "Docker nao encontrado" >&2; exit 2; }
+DUMP_PATH="$(realpath "$FILE")"
+ENTRIES="$(docker run --rm -v "$DUMP_PATH:/input.dump:ro" --entrypoint pg_restore postgres:18-alpine --list /input.dump)"
+TABLES="$(printf '%s\n' "$ENTRIES" | grep -Ec ' TABLE public ' || true)"
+[[ "$TABLES" -ge 20 ]] || { echo "Dump incompleto: $TABLES tabelas" >&2; exit 2; }
+echo "Catalogo pg_restore legivel ($TABLES tabelas)."
+if [[ "${2:-}" != "" ]]; then
+  [[ -f "$2" ]] || { echo "Arquivo de uploads ausente" >&2; exit 2; }
+  tar -tzf "$2" >/dev/null
+  echo "Arquivo de uploads tar.gz valido."
+fi
+echo "Verificacao de integridade do arquivo concluida. Teste de restauracao real exige branch Neon isolada."

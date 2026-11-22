@@ -1,24 +1,41 @@
 #!/usr/bin/env bash
+# Backup do banco remoto Neon + uploads Oracle; jamais usa PostgreSQL local.
 set -Eeuo pipefail
-cd "$(dirname "$0")/.."
-STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-BACKUP_DIR="${BACKUP_DIR:-./backups}"
-mkdir -p "$BACKUP_DIR"
-chmod 700 "$BACKUP_DIR"
-OUT="$BACKUP_DIR/atletica-$STAMP.dump"
-# Dump em formato customizado (inclui esquema e dados).
-docker compose exec -T db pg_dump -U atletica -d atletica -Fc > "$OUT"
-chmod 600 "$OUT"
-# Uploads privados também precisam de cópia consistente.
-docker compose run --rm --no-deps -T -v "$(realpath "$BACKUP_DIR"):/backup" --entrypoint sh web -c 'tar -czf /backup/uploads-archive.tar.gz -C /srv/atletica/storage .' 
-mv "$BACKUP_DIR/uploads-archive.tar.gz" "$BACKUP_DIR/uploads-$STAMP.tar.gz"
-chmod 600 "$BACKUP_DIR/uploads-$STAMP.tar.gz"
-find "$BACKUP_DIR" -maxdepth 1 -type f \( -name 'atletica-*.dump' -o -name 'uploads-*.tar.gz' \) -mtime +14 -delete
-if [[ -z "${BACKUP_REMOTE:-}" ]]; then
-  echo "ERRO: cópia local concluída, mas BACKUP_REMOTE não configurado. Backup remoto obrigatório antes de produção." >&2
-  exit 2
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+if [[ -f .env ]]; then
+  set -a
+  # Arquivo privado da VM; nao publique no Git.
+  source .env
+  set +a
 fi
-command -v rclone >/dev/null || { echo "Instale rclone para backup externo" >&2; exit 2; }
-rclone copy "$OUT" "$BACKUP_REMOTE" --checksum
-rclone copy "$BACKUP_DIR/uploads-$STAMP.tar.gz" "$BACKUP_REMOTE" --checksum
-echo "Backup local e remoto concluídos: $STAMP"
+
+: "${DATABASE_URL_UNPOOLED:?Configure DATABASE_URL_UNPOOLED (Neon direto, sem -pooler) no .env da VM}"
+: "${BACKUP_REMOTE:?Configure BACKUP_REMOTE (destino rclone externo a VM) no .env}"
+[[ "${DATABASE_URL_UNPOOLED}" == postgresql://* ]] || { echo "URL PostgreSQL invalida" >&2; exit 2; }
+[[ "${DATABASE_URL_UNPOOLED}" != *-pooler.* ]] || { echo "Use Neon direto para pg_dump, sem pooler" >&2; exit 2; }
+command -v docker >/dev/null || { echo "Docker nao encontrado" >&2; exit 2; }
+command -v rclone >/dev/null || { echo "rclone nao encontrado: backup remoto obrigatorio" >&2; exit 2; }
+
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+WORKDIR="$(mktemp -d)"
+chmod 700 "$WORKDIR"
+trap 'rm -rf -- "$WORKDIR"' EXIT
+DUMP="$WORKDIR/gato-db-$STAMP.dump"
+UPLOADS="$WORKDIR/gato-uploads-$STAMP.tar.gz"
+
+# Utiliza cliente Postgres em container efemero: o banco permanece na Neon.
+docker run --rm -e DATABASE_URL_UNPOOLED --entrypoint sh postgres:18-alpine \
+  -eu -c 'exec pg_dump --dbname="$DATABASE_URL_UNPOOLED" --format=custom --no-owner --no-privileges --no-password' > "$DUMP"
+[[ -s "$DUMP" ]] || { echo "pg_dump produziu arquivo vazio" >&2; exit 2; }
+
+# Copia o volume persistente da VM Oracle sem iniciar o servidor.
+docker compose run --rm --no-deps -T --user 0:0 \
+  -v "$WORKDIR:/backup" --entrypoint sh web \
+  -eu -c 'tar -czf /backup/'"$(basename "$UPLOADS")"' -C /srv/atletica/storage .'
+[[ -s "$UPLOADS" ]] || { echo "Arquivo de uploads vazio" >&2; exit 2; }
+
+(cd "$WORKDIR"; sha256sum "$(basename "$DUMP")" "$(basename "$UPLOADS")" > SHA256SUMS)
+rclone copyto "$DUMP" "$BACKUP_REMOTE/$(basename "$DUMP")" --checksum
+rclone copyto "$UPLOADS" "$BACKUP_REMOTE/$(basename "$UPLOADS")" --checksum
+rclone copyto "$WORKDIR/SHA256SUMS" "$BACKUP_REMOTE/gato-SHA256SUMS-$STAMP.txt" --checksum
+echo "Backup remoto finalizado ($STAMP). Artefatos locais temporarios removidos."
