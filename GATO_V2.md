@@ -36,6 +36,7 @@ Gato é um workspace operacional da Atlética. A versão 2 combina os módulos t
 - Fluxogramas: até 80 nós e 150 relações; mover nós, conectar, renomear, excluir, salvar.
 - Busca de títulos e favoritos pelo menu lateral.
 - O core financeiro/administrativo permanece operacional e isolado do conteúdo flexível.
+- Perfil e rotação de senha: `/app/perfil` permite troca da senha atual por outra com mínimo de 16 caracteres, invalidando sessões anteriores e registrando apenas metadados de auditoria.
 
 ## Critérios de validação
 - `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.

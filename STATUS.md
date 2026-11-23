@@ -28,14 +28,13 @@ Atualizado em 22/11/2026 (horário de Brasília). Repositório: DiogoAbreu01/Gat
 - Serviço Render Free: `gato-atletica-os`, URL https://gato-atletica-os.onrender.com, branch main, conectado à Neon por segredo no Environment do Render.
 - Deploy Moon Workspace `dep-dc1olsl9fdbs73beavbg` confirmado como `live`.
 - HTTP externo após deploy: `/api/health` 200 e `database: connected`; `/login` 200; `/app/espacos` sem sessão 307; `/api/workspace/pages` sem sessão 401.
-- Durante auditoria foi encontrado `/gato-lunar.svg` 404 (imagem Docker não copiava public/). Correção do Dockerfile preparada para novo deploy, pendente de validação externa.
+- Mascote em `/gato-lunar.svg` validado HTTP 200 depois da correção no Dockerfile e do deploy `dep-dc1onkajnfac739bgmfg` (commit `c874821`). Revisão visual de `/login` confirmou a paleta lunar e o SVG carregado.
 - BlueScale não modificado. PC de Itajubá usado somente para edição, testes e administração, não como servidor.
 
 ## Limites e próximos passos
-1. Confirmar novo build Render com `public/` copiado e SVG HTTP 200.
-2. Efetuar revisão visual do novo login e workspace em navegador.
-3. Testar manualmente os fluxos autenticados em produção, sem usar credenciais expostas no Git ou chats.
-4. Implementar rotação segura de senha temporária, attachments em storage durável e backup recorrente.
-5. Evoluir editor WYSIWYG/Markdown, importação XLSX, comentários, relações entre bancos e colaboração ao vivo.
+1. Publicar a rotação segura de senha via `/app/perfil` (branch `feature/gato-account-security`, testes CI de senha e sessões aprovados) e testar com uma conta autorizada.
+2. Testar manualmente os fluxos autenticados em produção, inclusive telas móveis, sem expor credenciais em ferramentas ou commits.
+3. Implementar armazenamento externo durável para anexos e backups recorrentes com teste de restauração.
+4. Evoluir editor WYSIWYG/Markdown, importação XLSX, comentários, relações entre bancos e colaboração ao vivo.
 
 Este lançamento é uma prévia funcional / homologação. Render Free suspende após inatividade e não oferece disco persistente ou SLA institucional.

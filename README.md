@@ -25,7 +25,7 @@
 - Banco de dados fora do PC: Neon projeto Gato, região São Paulo, branch production.
 - Frontend/backend fora do PC: Render Docker Free, URL pública acima.
 - Migrações `20261110000000_init` e `20261122000100_workspace_v2` já foram aplicadas ao banco externo. O histórico `_prisma_migrations` foi conferido.
-- O primeiro usuário administrador já foi criado na Neon. **Não há credenciais padrão ou senhas no repositório.**
+- O primeiro usuário administrador já foi criado na Neon. **Não há credenciais padrão ou senhas no repositório.** Em **Minha conta** (clique no perfil no rodapé da barra lateral), é possível alterar sua senha. A alteração revoga as sessões anteriores.
 - Uploads locais estão bloqueados no Render Free (disco efêmero); links externos em documentos são suportados.
 - O plano gratuito dorme após inatividade; não tem SLA de disponibilidade, backups automáticos de arquivos nem recursos garantidos para uso institucional crítico.
 
