@@ -27,11 +27,15 @@ Data: 2026-11-22 (America/Sao_Paulo). Ambiente: PC de Itajubá via Desktop Comma
 
 ## Regressão
 - tests/sheet-math.test.mjs cobre cálculos, ciclos, colunas AA..AD e proteção CSV.
-- Rodada local com 13 testes aprovados e 1 smoke ignorado localmente; typecheck, lint e build de produção executados.
+- Rodada local com 13 testes aprovados e 1 smoke ignorado localmente; typecheck, lint e build de produção executados. GitHub Actions 45102709272 e 45103560591 concluídos com sucesso (integração PostgreSQL efêmera).
+- Retestes de produção: menu único, 1 PATCH na digitação, SUM circular #CYCLE persistindo após recarregar, 2 nós de fluxograma persistidos, editor mobile sem overflow, zero exceções JS. API health repetida 8 vezes: todas 200 com banco conectado.
+- Deploys Render verificados live: d53f0ba (regressões de editor/planilha) e 153c402 (proteção de navegação).
 - Para testes HTTP integrados, GitHub Actions usa PostgreSQL efêmero em nuvem.
 
 ## Limitações
 - Render Free pode suspender após ociosidade.
-- Conta de QA, diretoria isolada e conteúdo serão removidos ao fim dos testes de navegação. A segunda rodada confirmou os recursos funcionais; o aviso de navegação com alterações pendentes ainda está em homologação.
+- **Limpeza executada e verificada em Neon**: 3 páginas, 7 revisões e a conta temporária/diretoria isolada foram apagadas em transação com COMMIT. Consulta final retornou qa_users=0 e qa_departments=0. Dados institucionais preservados.
+- O alerta de alterações não salvas foi validado no navegador real após deploy 153c402: exibiu 1 confirmação, impediu sair ao cancelar, salvou via PATCH HTTP 200 e depois navegou normalmente.
 - Módulos financeiros e disciplinares precisam de homologação específica sem dados reais.
 - O aviso de libunwind.dll no PC vem de outro aplicativo Windows chamado cometa_contacts_tests.exe, não do Gato.
+- Logs do Render tiveram mensagens ocasionais de conexão PostgreSQL encerrada, não reproduzidas como indisponibilidade no teste de saúde 8/8. Monitorar recorrência sem classificar como falha resolvida.
