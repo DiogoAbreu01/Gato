@@ -2,8 +2,10 @@
 
 **Um workspace universitário de gestão, com personalidade lunar.** O Gato reúne as funções administrativas da Atlética com um espaço de trabalho inspirado no Notion — páginas aninhadas, editor de blocos, planilhas, Kanban, fluxogramas, favoritos e busca.
 
-**Site:** https://gato-atletica-os.onrender.com  
-**Código:** https://github.com/DiogoAbreu01/Gato  
+**Site:** https://gato-atletica-os.onrender.com
+
+**Código:** https://github.com/DiogoAbreu01/Gato
+
 **Status:** prévia funcional hospedada na nuvem (Render Free + Neon PostgreSQL), sujeita às limitações gratuitas.
 
 ## O que já existe
