@@ -27,6 +27,19 @@ export function WorkspaceEditor({id}:{id:string}){
  },immediate?0:1300);return()=>clearTimeout(t)
  },[page,canEdit,conflict,dirty,draft,force]);
  useEffect(()=>{const onLeave=(e:BeforeUnloadEvent)=>{if(dirty){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',onLeave);return()=>window.removeEventListener('beforeunload',onLeave)},[dirty]);
+ // O Next Link navega sem beforeunload. Bloqueamos links internos e logout enquanto há alterações locais.
+ useEffect(()=>{
+  if(!dirty)return;
+  const guard=(event:MouseEvent)=>{
+   const target=event.target instanceof Element?event.target:null;
+   const link=target?.closest('a[href]') as HTMLAnchorElement|null;
+   const logout=target?.closest('button[title="Sair"]');
+   const internalLink=link&&link.origin===window.location.origin&&!link.hasAttribute('download')&&(link.pathname!==window.location.pathname||link.search!==window.location.search);
+   if((internalLink||logout)&&!window.confirm('Há alterações não salvas nesta página. Deseja sair mesmo assim?')){event.preventDefault();event.stopImmediatePropagation()}
+  };
+  document.addEventListener('click',guard,true);
+  return()=>document.removeEventListener('click',guard,true);
+ },[dirty]);
  async function favorite(){if(!page)return;const r=await fetch('/api/workspace/pages/'+id+'/favorite',{method:'POST'});if(r.ok){const x=await r.json();setPage(p=>p?{...p,favorite:x.favorite}:p)}}
  async function archive(){if(!page||!confirm('Arquivar esta página? O histórico será preservado.'))return;const r=await fetch('/api/workspace/pages/'+id,{method:'DELETE'});const x=await r.json();if(!r.ok){setError(x.error||'Não foi possível arquivar');return}router.push('/app/espacos/'+page.departmentId);router.refresh()}
  const grid=isGrid(data)?data:{columns:['Nome','Status'],rows:[],view:'table' as const};
@@ -34,7 +47,7 @@ export function WorkspaceEditor({id}:{id:string}){
  return <div className="workspace-editor">
   {loading?<div className="panel p-10 muted">Abrindo a página...</div>:!page?<div className="panel p-10" role="alert">{error||'Página não encontrada'}</div>:<>
    <div className="flex items-center flex-wrap justify-between gap-3 mb-9">
-    <div className="flex gap-3 items-center"><Link href={'/app/espacos/'+page.departmentId} onClick={e=>{if(dirty&&!window.confirm('Há alterações não salvas. Sair mesmo assim?'))e.preventDefault()}} className="btn !p-2" aria-label="Voltar ao espaço"><ArrowLeft size={18}/></Link><div className="text-xs muted">Espaços / <span className="font-semibold">{page.kind==='PAGE'?'Página':page.kind==='SHEET'?'Planilha':page.kind==='FLOW'?'Fluxograma':'Banco de dados'}</span></div></div>
+    <div className="flex gap-3 items-center"><Link href={'/app/espacos/'+page.departmentId} className="btn !p-2" aria-label="Voltar ao espaço"><ArrowLeft size={18}/></Link><div className="text-xs muted">Espaços / <span className="font-semibold">{page.kind==='PAGE'?'Página':page.kind==='SHEET'?'Planilha':page.kind==='FLOW'?'Fluxograma':'Banco de dados'}</span></div></div>
     <div className="flex items-center gap-2 flex-wrap"><span className="text-xs muted flex items-center gap-1">{saving?<><Cloud size={15}/> Salvando...</>:dirty?<><CloudOff size={15}/> Alterações pendentes</>:<><Check size={15}/> Salvo na Neon</>}</span>
     <button className={'btn !p-2 '+(page.favorite?'moon-accent':'')} title="Favorito" onClick={favorite}><Star size={16} fill={page.favorite?'currentColor':'none'}/></button>
     {canEdit&&<button className="btn btn-primary" disabled={saving||!dirty||conflict} onClick={()=>setForce(x=>x+1)}>Salvar agora</button>}
