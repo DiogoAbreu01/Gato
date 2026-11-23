@@ -38,6 +38,15 @@ Financeiro (lançamentos, contas, categorias e estornos), ocorrências disciplin
 - TypeScript local passou; ESLint 0 erros, 2 avisos de configuração anteriores; 13 testes unitários locais aprovados; os smoke tests permanecem ignorados quando RUN_SMOKE não é ativado.
 - Nenhum banco nem servidor de produção foi iniciado no PC do usuário.
 
+## Homologação autenticada pelo PC de Itajubá
+- Playwright Chromium executado no PC contra https://gato-atletica-os.onrender.com já na versão 3193486.
+- Criadas duas diretorias [QA] isoladas na Neon e três contas sintéticas com apenas papéis DOCUMENTOS EDITOR / VIEWER; sem qualquer acesso a Financeiro ou Pessoas.
+- 13 verificações manuais aprovadas; zero exceções JavaScript: criação de documento privado por link na interface, listagem, leitura com VIEWER da mesma diretoria, ocultação do botão de criação para VIEWER, bloqueio 403 para Financeiro e Ocorrências, bloqueio de listagem/consulta IDOR da segunda diretoria (404), interface de documentos a 390px sem overflow.
+- A interface avisou corretamente que uploads físicos estão desativados no Render Free.
+- Após o teste, limpeza SQL transacional de todas as contas, diretorias, sessões, documento e auditorias sintéticas. Consulta SQL final: qa_users=0, qa_departments=0, qa_documents=0; nenhum registro institucional foi removido.
+- Testes anônimos: desktop e celular não conseguem abrir as três telas sem login; APIs correspondentes retornaram 401; health respondeu HTTP 200 com banco conectado.
+- Release do Render: deploy dep-dc1r2vmtlv9c73csgn50, commit 3193486, confirmado live.
+
 ## Limitações e próximos passos
 - Render Free usa disco temporário; upload físico permanece **indisponível no serviço público** enquanto não houver storage persistente (API responde 503 intencionalmente). A correção de upload foi validada na infraestrutura CI; documentos por links HTTPS funcionam no Render.
 - Testes de concorrência simultânea no estorno/ajustes e recuperação de backup não estão contemplados por esta suíte.
