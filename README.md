@@ -1,8 +1,6 @@
-<div align="center">
+<p align="center"><img src="public/gato-lunar.svg" width="112" alt="Gato, a lunar cat with glasses" /></p>
 
-<img src="public/gato-lunar.svg" width="112" alt="Gato, a lunar cat with glasses" />
-
-# Gato ☾
+<h1 align="center">Gato ☾</h1>
 
 **A little moonlight for a lot of university chaos.**
 
@@ -14,7 +12,6 @@
 ![Next.js](https://img.shields.io/badge/Next.js-14141b?style=flat-square&logo=nextdotjs&logoColor=ffffff)
 ![Neon PostgreSQL](https://img.shields.io/badge/Neon_PostgreSQL-14141b?style=flat-square&logo=postgresql&logoColor=c1b4fc)
 
-</div>
 
 > **DAs / After dark:** Serious software can still have a mascot. The little cat wears glasses; the database still enforces permissions.
 
