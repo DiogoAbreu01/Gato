@@ -27,6 +27,9 @@ test('integração real: login, criar, editar e histórico de concorrência', {s
  const money=await request('/api/records/transactions','POST',{description:'Receita integração CI',kind:'INCOME',amount:'19.90',occurredAt:new Date().toISOString(),accountId:account.id,departmentId:dept.id});assert.equal(money.status,201,JSON.stringify(money.body));
  const reversed=await request(`/api/records/transactions/${money.body.record.id}`,'DELETE');assert.equal(reversed.status,200,JSON.stringify(reversed.body));assert.equal(reversed.body.record.kind,'EXPENSE');
  const twice=await request(`/api/records/transactions/${money.body.record.id}`,'DELETE');assert.equal(twice.status,409);
+ const dashboardHtml=await fetch(new URL('/app',base),{headers:{cookie},redirect:'manual'});assert.equal(dashboardHtml.status,200);
+ const spacesHtml=await fetch(new URL('/app/espacos',base),{headers:{cookie},redirect:'manual'});assert.equal(spacesHtml.status,200);
+ const departmentHtml=await fetch(new URL('/app/espacos/'+dept.id,base),{headers:{cookie},redirect:'manual'});assert.equal(departmentHtml.status,200);
  const treeBefore=await request('/api/workspace/pages?departmentId='+dept.id);assert.equal(treeBefore.status,200);
  const workspace=await request('/api/workspace/pages','POST',{title:'Processos da Atlética',departmentId:dept.id,kind:'PAGE'});assert.equal(workspace.status,201,JSON.stringify(workspace.body));
  const rootPage=workspace.body.page;

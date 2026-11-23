@@ -9,7 +9,7 @@ export async function GET(req:NextRequest){
  if(departmentId&&!hasWorkspaceAccess(actor,departmentId,'read'))return bad('Sem acesso a este espaço',403);
  const allowed=actor.globalRole==='ADMIN'||actor.globalRole==='BOARD'?null:actor.departments.map(x=>x.departmentId);
  const pages=await prisma.workspacePage.findMany({
-  where:{archivedAt:null,departmentId:departmentId||{in:allowed??undefined}},
+  where:{archivedAt:null,...(departmentId?{departmentId}:allowed?{departmentId:{in:allowed}}:{})},
   select:{id:true,title:true,icon:true,kind:true,parentId:true,departmentId:true,version:true,updatedAt:true,
    favorites:{where:{userId:actor.id},select:{userId:true}}},
   orderBy:[{updatedAt:'desc'}],take:500
