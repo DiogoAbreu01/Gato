@@ -9,7 +9,7 @@ import {prisma} from '@/lib/prisma';
 export const runtime='nodejs';
 const MAX=10*1024*1024;
 const whitelist=new Set(['application/pdf','image/jpeg','image/png','text/plain','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
-const schema=z.object({title:z.string().trim().min(1).max(300),description:z.string().max(1000).optional(),departmentId:z.string().uuid()});
+const schema=z.object({title:z.string().trim().min(1).max(300),description:z.string().max(1000).nullish(),departmentId:z.string().uuid()});
 function validSignature(buffer:Buffer,type:string){
  if(type==='application/pdf')return buffer.subarray(0,5).toString()==='%PDF-';
  if(type==='image/png')return buffer.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
@@ -33,8 +33,11 @@ export async function POST(req:NextRequest){
  await mkdir(dir,{recursive:true,mode:0o700});const stored=path.join(dir,key);
  try{
   await writeFile(stored,bytes,{flag:'wx',mode:0o600});
-  const record=await prisma.document.create({data:{title:data.data.title,description:data.data.description||null,departmentId:data.data.departmentId,fileName:path.basename(file.name).slice(0,255),contentType:file.type,sizeBytes:file.size,storageKey:key,private:true}});
-  await prisma.auditLog.create({data:{userId:actor.id,resource:'documents',recordId:record.id,action:'upload',details:{sizeBytes:file.size,contentType:file.type}}});
+  const record=await prisma.$transaction(async tx=>{
+    const document=await tx.document.create({data:{title:data.data.title,description:data.data.description||null,departmentId:data.data.departmentId,fileName:path.basename(file.name).slice(0,255),contentType:file.type,sizeBytes:file.size,storageKey:key,private:true}});
+    await tx.auditLog.create({data:{userId:actor.id,resource:'documents',recordId:document.id,action:'upload',details:{sizeBytes:file.size,contentType:file.type}}});
+    return document;
+  });
   return NextResponse.json({record},{status:201});
  }catch(e){await unlink(stored).catch(()=>{});console.error('upload error',e);return bad('Não foi possível armazenar o arquivo',500)}
 }

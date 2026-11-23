@@ -56,7 +56,11 @@ async function checkLinks(tx: Prisma.TransactionClient, resource:string, data:Re
   }
   if (resource === 'transactions') {
     const account = await tx.financialAccount.findUnique({where:{id:data.accountId}});
-    if (!account?.active) throw new HttpFailure(400,'Conta financeira inexistente ou inativa');
+    if (!account?.active) throw new HttpFailure(422,'Conta financeira inexistente ou inativa');
+    if (data.categoryId) {
+      const category = await tx.financialCategory.findUnique({where:{id:data.categoryId},select:{id:true}});
+      if (!category) throw new HttpFailure(422,'Categoria financeira inexistente');
+    }
   }
 }
 
