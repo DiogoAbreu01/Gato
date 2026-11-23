@@ -1,16 +1,33 @@
-# Gato — Sistema de Gestão da Atlética
+# Gato ☾ — Moon Workspace da Atlética
 
-Sistema de gestão administrativa de Atléticas universitárias. Código independente do BlueScale, com Next.js, React, TypeScript, Prisma e PostgreSQL.
+**Um workspace universitário de gestão, com personalidade lunar.** O Gato reúne as funções administrativas da Atlética com um espaço de trabalho inspirado no Notion — páginas aninhadas, editor de blocos, planilhas, Kanban, fluxogramas, favoritos e busca.
 
-**Prévia hospedada externamente (Render Free + Neon): https://gato-atletica-os.onrender.com** — app e banco conectados, verificado por `/api/health` em 22/11/2026. Ainda falta inicializar o primeiro administrador para permitir login real; uploads locais estão desativados por não haver disco persistente. Veja `DEPLOY_RENDER.md`.
+**Site:** https://gato-atletica-os.onrender.com  
+**Código:** https://github.com/DiogoAbreu01/Gato  
+**Status:** prévia funcional hospedada na nuvem (Render Free + Neon PostgreSQL), sujeita às limitações gratuitas.
 
-## Estado desta entrega
+## O que já existe
 
-**Base de desenvolvimento, não certificada para produção.** Possui autenticação por sessão, usuários administrativos e papéis, gerenciamento de membros (múltiplas diretorias), eventos, tarefas, movimentações financeiras com estornos, agenda editorial, equipes e campeonatos, projetos, documentos com upload privado, ocorrências com ajustes auditáveis, notificações, calendário global e dashboard. A migração inicial já foi aplicada à Neon e confirmada em 22/11/2026; testes integrados passaram no GitHub Actions com PostgreSQL efêmero. **A aplicação ainda depende de VM Oracle, credenciais privadas, bootstrap e testes end-to-end na Neon de produção.** Consulte `STATUS.md`.
+- Workspace por diretoria com páginas e subtópicos; conteúdo salvo no PostgreSQL, com histórico e proteção de concorrência.
+- Editor de parágrafos, títulos, listas, checklists, links e citações.
+- Planilhas com células dinâmicas, fórmulas básicas (SUM e operações), filtros e CSV.
+- Bancos de dados com alternância de tabela/Kanban; fluxogramas com nós móveis e ligações editáveis.
+- Busca de páginas, favoritos por usuário, permissões por diretoria, tema claro/escuro, interface responsiva e gatinho lunar de óculos.
+- Administração existente: autenticação, departamentos, membros, eventos, tarefas, calendário, finanças e estornos, publicações, eSports, DGE, documentos, notificações e trilha de auditoria.
 
-## Ambiente de desenvolvimento (somente código e testes, sem hospedar bancos no PC)
+**Leia [GATO_V2.md](GATO_V2.md)** para modelo de dados, APIs, limites e roadmap. Arquitetura e segurança em [ARCHITECTURE.md](ARCHITECTURE.md) e [SECURITY.md](SECURITY.md).
 
-Requisitos: Node.js 22, npm e um banco PostgreSQL **externo**. Não execute serviço ou banco persistente no PC de desenvolvimento. No diretório do projeto:
+## Dados e infraestrutura
+
+- Backend Next.js 16, React 19, TypeScript, Prisma 6 e PostgreSQL (Neon).
+- Banco de dados fora do PC: Neon projeto Gato, região São Paulo, branch production.
+- Frontend/backend fora do PC: Render Docker Free, URL pública acima.
+- Migrações `20261110000000_init` e `20261122000100_workspace_v2` já foram aplicadas ao banco externo. O histórico `_prisma_migrations` foi conferido.
+- O primeiro usuário administrador já foi criado na Neon. **Não há credenciais padrão ou senhas no repositório.**
+- Uploads locais estão bloqueados no Render Free (disco efêmero); links externos em documentos são suportados.
+- O plano gratuito dorme após inatividade; não tem SLA de disponibilidade, backups automáticos de arquivos nem recursos garantidos para uso institucional crítico.
+
+## Qualidade
 
 ```bash
 npm ci
@@ -22,31 +39,16 @@ npm test
 npm run build
 ```
 
-Essas verificações não iniciam um servidor nem um banco persistente no PC. A conta inicial será criada **somente na VM** com `ADMIN_EMAIL` e `ADMIN_PASSWORD` (mínimo 16 caracteres); nunca registre credenciais no GitHub. O bootstrap não redefine a senha de um administrador existente.
+GitHub Actions executa integração com PostgreSQL **efêmero na nuvem**, migração, bootstrap, build e testes HTTP de módulos administrativos e do workspace (inclusão de página, revisão, conflito 409, permissões, planilha, fluxograma). Testes contra produção devem usar uma sessão autenticada autorizada.
 
-## Hospedagem definitiva: Oracle Cloud VM + Neon Postgres (sem banco no computador)
+## Desenvolvimento
 
-Na VM Oracle, configure um `.env` privado contendo `DATABASE_URL` Neon com pooling, `DATABASE_URL_UNPOOLED` Neon direta, `APP_URL=https://dominio`, `DOMAIN=dominio` e credenciais administrativas iniciais. O `compose.yaml` **não cria contêiner PostgreSQL**: usa exclusivamente o banco externo.
+O PC de Itajubá é utilizado **apenas para desenvolvimento e testes de compilação**. Não instale ou hospede o banco nem mantenha o site de produção no computador.
 
-```bash
-git clone https://github.com/DiogoAbreu01/Gato.git
-cd Gato
-# Configure .env privado na VM e DNS apontando para o IP público
-sudo docker compose --env-file .env up -d --build
-# A migration inicial já existe na Neon; bootstrap uma vez, com conta administrativa inicial:
-sudo docker compose --env-file .env run --rm --no-deps migrate npm run db:bootstrap
-```
+Para instalação em outro ambiente, crie um `.env` privado com `DATABASE_URL`, `APP_URL` e variáveis administrativas. **Nunca comite credenciais nem dados de usuários.**
 
-Não exponha portas 3000/5432 à internet. O proxy Caddy usa 80/443 e HTTPS. Não execute este compose no PC; ele é o deploy da VM. A VM Oracle ainda precisa ser provisionada e validada. Veja `DEPLOYMENT.md` e `STATUS.md`.
+## Evoluções planejadas
 
-## Testes
+Importação XLSX, comentários e colaboração ao vivo, relações entre bases, fluxos de aprovação personalizáveis, editor Markdown/WYSIWYG mais amplo, attachments S3 duráveis e backup externo recorrente. A implementação existente é uma primeira versão funcional, não reprodução integral do Notion.
 
-```bash
-npm test              # verificações estáticas locais
-npm run typecheck     # depende de npm install e prisma generate
-npx prisma validate  # valida modelo
-# testes de integração exigem banco isolado, app iniciado e variáveis de CI
-RUN_SMOKE=1 node --test tests/smoke.test.mjs
-```
-
-Documentos: `ARCHITECTURE.md`, `SECURITY.md`, `DEPLOYMENT.md`, `ROADMAP.md` e `STATUS.md`.
+**Atenção:** Gato é independente do BlueScale. Alterações de infraestrutura no Gato não mexem no código ou banco do BlueScale; porém, serviços Free na mesma workspace Render podem compartilhar a cota mensal de horas.

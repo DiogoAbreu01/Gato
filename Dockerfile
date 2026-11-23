@@ -18,6 +18,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN groupadd -g 1001 nodeapp && useradd -r -u 1001 -g nodeapp nodeapp && mkdir -p /srv/atletica/storage && chown -R nodeapp:nodeapp /srv/atletica
 COPY --from=builder --chown=nodeapp:nodeapp /app/.next/standalone ./
 COPY --from=builder --chown=nodeapp:nodeapp /app/.next/static ./.next/static
+COPY --from=builder --chown=nodeapp:nodeapp /app/public ./public
 COPY --from=builder --chown=nodeapp:nodeapp /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nodeapp:nodeapp /app/node_modules/@prisma/client ./node_modules/@prisma/client
 USER nodeapp

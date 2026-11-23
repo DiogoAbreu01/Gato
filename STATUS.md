@@ -1,28 +1,41 @@
-# Gato — situação em 2026-11-22
+# Gato — STATUS de entrega Moon Workspace
 
-## Hospedagem externa em funcionamento
-- **Render Free**: serviço `gato-atletica-os`, região Virginia, Docker, branch main. URL pública **https://gato-atletica-os.onrender.com**. Serviço identificado como `srv-dc1mapp42hec73aocjo0`.
-- **Neon Postgres**: projeto Gato (organização Gato Atletica), banco `neondb`, branch production, região São Paulo. `DATABASE_URL` segura foi configurada como variável privativa do serviço Render; não versionada nem incluída em mensagens.
-- **Prova de conectividade externa**: em 2026-11-22 22:09 UTC, `GET /api/health` = **HTTP 200**, corpo `{"status":"ok","database":"connected"}`; `/login` = HTTP 200; `/` = HTTP 307 para login; `/api/auth/me` e `/api/records/members` sem sessão = HTTP 401.
-- Primeiro deploy Render falhou porque Dockerfile referenciava diretório public inexistente; corrigido no commit `ddc8552`. Segundo deploy retornou 502 por bind inadequado; ajustado para `HOSTNAME=0.0.0.0` no commit `aee3c0c`, que entrou em produção e passou no healthcheck.
-- Serviço e banco funcionam integralmente fora do PC de desenvolvimento. BlueScale não foi modificado, mas compartilha a cota gratuita mensal da mesma workspace Render.
+Atualizado em 22/11/2026 (horário de Brasília). Repositório: DiogoAbreu01/Gato.
 
-## Banco de dados
-- Migração inicial `20261110000000_init` aplicada no projeto Neon original por transação via SQL Editor, com SHA256 `ae1025e121d596fad03a05fbdda5df268ee8f595e57a509ee6ebc8ee0bbba207` no `_prisma_migrations` e `finished_at` confirmado.
-- 23 tabelas de modelos + `_prisma_migrations`, total 24 tabelas verificadas.
-- Em 2026-11-22 22:08 UTC, seed confirmado por SQL Editor: 7 diretorias e 10 categorias financeiras, numa transação.
-- Snapshot manual da Neon criado em 2026-11-22T21:46:34Z (limite do Free: 1 snapshot manual, sem agendamento); backup de rotina fora do serviço ainda não instalado.
+## Versão Gato 2.0
+- Nova identidade preto/branco/lavanda e mascote lunar com óculos em `public/gato-lunar.svg`.
+- Layout reestruturado para corrigir tela principal vazia e navegação responsiva.
+- Espaços por diretoria, páginas e subpáginas persistidas, favoritos e busca.
+- Editor de blocos (texto, título, listas, checklist, citação, divisor, link).
+- Planilhas (fórmulas básicas, filtro, CSV), databases com tabela/Kanban, fluxogramas com nós e ligações editáveis.
+- Autosave por versão, conflito HTTP 409, histórico das revisões, auditoria e permissões na API por diretoria.
 
-## Testes e versionamento
-- Compilação Next.js 16/React 19/Prisma 6 aprovada; typecheck exit 0, lint exit 0 (2 avisos), 9 testes estáticos/unitários locais aprovados, 1 teste HTTP ignorado localmente.
-- GitHub Actions com PostgreSQL efêmero, migrations, bootstrap, CRUD, autorização e estornos aprovado inclusive no commit `aee3c0c` (workflow 45075833158). Este CI NÃO é a Neon de produção.
-- Autenticação, sessões, RBAC por diretoria, membros, eventos, tarefas, finanças, publicidade, eSports, DGE, documentos, ocorrências e notificações implementados em código e testados em CI; a validação manual de cada fluxo em produção ainda está pendente.
+## Testes executados
+- `npm run typecheck`: saída 0.
+- `npm run lint`: saída 0 com 2 avisos de estilo existentes no repositório.
+- `npm run build`: saída 0, Next.js 16.1.0/Webpack, rotas de workspace emitidas.
+- `npm test` local: 9 aprovados, 1 smoke ignorado localmente por depender de servidor/DB.
+- GitHub Actions `45089502655` e `45089660698`: conclusão **success** com Postgres 16 efêmero, `prisma migrate deploy`, bootstrap, build, servidor HTTP, novos testes de criação, edição, subpágina, favoritos, planilhas, fluxos, conflito 409 e bloqueios RBAC. Não houve banco hospedado no PC.
+- Branch de homologação `feature/gato-2-moon-workspace` publicada, validada e merge fast-forward em `main` no commit `dad8121`.
 
-## Limitações e pendências prioritárias
-1. **Primeiro administrador**: ainda não foi provisionado no Neon de produção. A página de login abre, mas não existe uma credencial administrativa inicial entregue ao usuário. Executar bootstrap seguro, sem expor senha em arquivos públicos, e testar login completo.
-2. **Upload de documentos**: no Render Free o disco é efêmero. Upload local foi desativado para evitar perda irreversível; documentos podem usar links externos. Para uploads reais, integrar armazenamento durável compatível com S3 antes de ativá-los.
-3. **Disponibilidade**: Render Free dorme após 15 min de inatividade e pode levar até ~1 min para despertar, além da cota de 750 h/mês **compartilhada com BlueScale**. Render explicitamente desaconselha Free para produção institucional. Considerar plano pago ou outro serviço para operação 24/7.
-4. **Segurança/operacional**: revisão de autorização em múltiplos perfis e fluxos reais de produção, política de armazenamento, monitoramento, alertas e backup remoto/restore periódico.
-5. **Produto**: relatórios, busca global, aprovações avançadas e refinamentos de UX permanecem no roadmap.
+## Banco Neon produção
+- Org Gato Atletica, projeto Gato, banco neondb, região sa-east-1.
+- Migração original + `20261122000100_workspace_v2` aplicadas na Neon por transação, com checksum SHA256 `a98c5fac6dcbd4d386e4df6b17b09b10864e4c83a8c9cb48ea702063c3db901f` no `_prisma_migrations`.
+- Verificação SQL: **27 tabelas**, `migrated=1`, **1 usuário administrativo preservado**, **7 diretorias preservadas**.
+- Snapshot manual anterior disponível no plano Free; backup periódico externo e teste de restauração ainda pendentes.
 
-Documentação: `DEPLOY_RENDER.md`, `SECURITY.md`, `ARCHITECTURE.md`. A Oracle não é requisito para continuar este projeto.
+## Hospedagem externa
+- Serviço Render Free: `gato-atletica-os`, URL https://gato-atletica-os.onrender.com, branch main, conectado à Neon por segredo no Environment do Render.
+- Deploy Moon Workspace `dep-dc1olsl9fdbs73beavbg` confirmado como `live`.
+- HTTP externo após deploy: `/api/health` 200 e `database: connected`; `/login` 200; `/app/espacos` sem sessão 307; `/api/workspace/pages` sem sessão 401.
+- Durante auditoria foi encontrado `/gato-lunar.svg` 404 (imagem Docker não copiava public/). Correção do Dockerfile preparada para novo deploy, pendente de validação externa.
+- BlueScale não modificado. PC de Itajubá usado somente para edição, testes e administração, não como servidor.
+
+## Limites e próximos passos
+1. Confirmar novo build Render com `public/` copiado e SVG HTTP 200.
+2. Efetuar revisão visual do novo login e workspace em navegador.
+3. Testar manualmente os fluxos autenticados em produção, sem usar credenciais expostas no Git ou chats.
+4. Implementar rotação segura de senha temporária, attachments em storage durável e backup recorrente.
+5. Evoluir editor WYSIWYG/Markdown, importação XLSX, comentários, relações entre bancos e colaboração ao vivo.
+
+Este lançamento é uma prévia funcional / homologação. Render Free suspende após inatividade e não oferece disco persistente ou SLA institucional.
