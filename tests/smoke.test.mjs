@@ -58,4 +58,11 @@ test('integração real: login, criar, editar e histórico de concorrência', {s
  const privatePage=await request('/api/workspace/pages/'+rootPage.id);assert.equal(privatePage.status,403);
  const blockedPageCreate=await request('/api/workspace/pages','POST',{title:'Página indevida',departmentId:dept.id,kind:'PAGE'});assert.equal(blockedPageCreate.status,403);
  const blockedPageEdit=await request('/api/workspace/pages/'+rootPage.id,'PATCH',{version:editPage.body.page.version,title:'Hack'});assert.equal(blockedPageEdit.status,403);
+ const invalidUpdate=await request('/api/auth/password','POST',{currentPassword:'invalid',newPassword:'short'});assert.equal(invalidUpdate.status,422);
+ const newCredential=['Gato','CI',Date.now().toString(36),Math.random().toString(36)].join('-');
+ const wrongCurrent=await request('/api/auth/password','POST',{currentPassword:'incorrect',newPassword:newCredential});assert.equal(wrongCurrent.status,403);
+ const passwordChange=await request('/api/auth/password','POST',{currentPassword:regularPassword,newPassword:newCredential});assert.equal(passwordChange.status,200,JSON.stringify(passwordChange.body));
+ const sessionRevoked=await request('/api/auth/me');assert.equal(sessionRevoked.status,401);
+ const oldAuth=await request('/api/auth/login','POST',{email:regularEmail,password:regularPassword});assert.equal(oldAuth.status,401);
+ const newAuth=await request('/api/auth/login','POST',{email:regularEmail,password:newCredential});assert.equal(newAuth.status,200,JSON.stringify(newAuth.body));
 });
