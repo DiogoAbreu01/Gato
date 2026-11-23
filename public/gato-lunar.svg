@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Gato lunar de óculos">
+ <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2a2c42"/><stop offset="1" stop-color="#0c0c17"/></linearGradient><linearGradient id="moon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dcdcff"/><stop offset="1" stop-color="#9da0e8"/></linearGradient></defs>
+ <circle cx="64" cy="64" r="60" fill="url(#bg)" stroke="#999bd6" stroke-opacity=".46" stroke-width="2"/>
+ <path d="M27 57 27 25 Q28 18 34 23 L49 39 Q64 34 79 39 L94 23 Q100 18 101 26 L100 58 Q110 80 96 98 Q85 113 64 112 Q43 113 31 98 Q17 81 27 57Z" fill="#141626" stroke="#c7c8ee" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M32 51 33 31 45 43Z M96 51 95 31 83 43Z" fill="#a6a9e7"/>
+ <path d="M64 39 a12 12 0 1 0 10 16 a10 10 0 1 1 -10 -16" fill="url(#moon)"/>
+ <ellipse cx="43" cy="73" rx="16" ry="18" fill="#f1f0ff"/>
+ <ellipse cx="85" cy="73" rx="16" ry="18" fill="#f1f0ff"/>
+ <ellipse cx="47" cy="75" rx="8" ry="11" fill="#383852"/>
+ <ellipse cx="81" cy="75" rx="8" ry="11" fill="#383852"/>
+ <circle cx="49" cy="70" r="3" fill="white"/><circle cx="83" cy="70" r="3" fill="white"/>
+ <circle cx="43" cy="73" r="23" fill="none" stroke="#cfd1fc" stroke-width="5"/>
+ <circle cx="85" cy="73" r="23" fill="none" stroke="#cfd1fc" stroke-width="5"/>
+ <path d="M66 71 Q64 67 62 71" stroke="#cfd1fc" stroke-width="5" fill="none" stroke-linecap="round"/>
+ <path d="M57 95 Q64 88 71 95 L64 101Z" fill="#b8b8f9"/>
+ <path d="M64 102 Q58 110 53 104 M64 102 Q70 110 75 104" stroke="#f5f4ff" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+ <path d="M25 96 40 98 M24 104 41 103 M103 96 88 98 M104 104 87 103" stroke="#d6d6f1" stroke-width="2" stroke-linecap="round"/>
+ <path d="M108 18 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3Z" fill="#b3b6ff"/>
+ </svg>

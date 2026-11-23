@@ -79,6 +79,8 @@ model User {
   auditLogs   AuditLog[]
   notifications Notification[]
   assignments Task[] @relation("TaskOwner")
+  createdWorkspacePages WorkspacePage[] @relation("WorkspacePagesCreated")
+  workspaceFavorites WorkspacePageFavorite[]
 }
 
 model Session {
@@ -116,6 +118,7 @@ model Department {
   projects  Project[]
   documents Document[]
   occurrences DisciplinaryOccurrence[]
+  workspacePages WorkspacePage[]
 }
 
 model UserDepartment {
@@ -395,4 +398,59 @@ model OrganizationSetting {
   key       String @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+enum WorkspacePageKind {
+  PAGE
+  SHEET
+  FLOW
+  DATABASE
+}
+
+model WorkspacePage {
+  id String @id @default(uuid())
+  title String @default("Sem título")
+  icon String? @default("🌙")
+  kind WorkspacePageKind @default(PAGE)
+  departmentId String
+  parentId String?
+  content Json @default("[]")
+  data Json @default("{}")
+  version Int @default(1)
+  createdById String
+  updatedById String
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  parent WorkspacePage? @relation("WorkspacePageTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children WorkspacePage[] @relation("WorkspacePageTree")
+  creator User @relation("WorkspacePagesCreated", fields: [createdById], references: [id], onDelete: Restrict)
+  revisions WorkspacePageRevision[]
+  favorites WorkspacePageFavorite[]
+  @@index([departmentId, archivedAt, parentId])
+  @@index([createdAt])
+}
+
+model WorkspacePageRevision {
+  id String @id @default(uuid())
+  pageId String
+  version Int
+  title String
+  content Json
+  data Json
+  changedById String
+  createdAt DateTime @default(now())
+  page WorkspacePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  @@unique([pageId, version])
+}
+
+model WorkspacePageFavorite {
+  pageId String
+  userId String
+  createdAt DateTime @default(now())
+  page WorkspacePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([pageId, userId])
+  @@index([userId])
 }
