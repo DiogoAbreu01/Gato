@@ -20,10 +20,10 @@ export function WorkspaceBlocks({blocks,onChange,readOnly=false}:{blocks:Workspa
      <div className="flex gap-3 items-start">{b.type==='todo'&&<input aria-label="Concluído" type="checkbox" disabled={readOnly} className="mt-2 accent-[var(--accent)]" checked={!!b.checked} onChange={e=>update(b.id,{checked:e.target.checked})}/>}
        {b.type==='bullet'&&<span className="muted pt-1">•</span>}
        <textarea rows={b.type==='heading'?1:2} disabled={readOnly} className="block-input block-textarea" style={b.type==='todo'&&b.checked?{textDecoration:'line-through',opacity:.6}:{}} placeholder={b.type==='heading'?'Título da seção':b.type==='quote'?'Uma citação ou observação...':b.type==='todo'?'Uma tarefa para concluir...':b.type==='bullet'?'Item de lista...':'Escreva aqui...'} value={b.text} maxLength={12000} onChange={e=>update(b.id,{text:e.target.value})}
-       onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!readOnly&&b.type!=='paragraph'){e.preventDefault();add(b.type,i+1)}if(e.key==='/'&&b.text===''){setChooser(i+1)}}}/>
+       onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!readOnly&&b.type!=='paragraph'){e.preventDefault();add(b.type,i+1)}if(e.key==='/'&&b.text===''){e.preventDefault();setChooser(i+1)}}}/>
      </div>}
    </div>
-   {chooser===i+1&&<BlockChooser onChoose={kind=>add(kind,i+1)} onClose={()=>setChooser(null)}/>}
+   {i<blocks.length-1&&chooser===i+1&&<BlockChooser onChoose={kind=>add(kind,i+1)} onClose={()=>setChooser(null)}/>}
   </div>)}
   {!readOnly&&<div className="mt-6"><button className="btn" onClick={()=>setChooser(chooser===blocks.length?null:blocks.length)}><Plus size={16}/> Adicionar bloco</button>{chooser===blocks.length&&<BlockChooser onChoose={type=>add(type,blocks.length)} onClose={()=>setChooser(null)}/>}</div>}
   {!blocks.length&&readOnly&&<p className="muted">Esta página ainda não tem conteúdo.</p>}

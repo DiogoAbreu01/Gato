@@ -12,18 +12,19 @@ type Draft={title:string;icon:string;content:WorkspaceBlock[];data:Record<string
 const isGrid=(v:unknown):v is GridData=>!!v&&typeof v==='object'&&'rows' in v&&'columns' in v;
 const isFlow=(v:unknown):v is FlowData=>!!v&&typeof v==='object'&&'nodes' in v&&'edges' in v;
 export function WorkspaceEditor({id}:{id:string}){
- const router=useRouter();const [page,setPage]=useState<Page|null>(null);const [canEdit,setCanEdit]=useState(false);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [conflict,setConflict]=useState(false);const [saving,setSaving]=useState(false);const [force,setForce]=useState(0);const savingRef=useRef(false);const [persisted,setPersisted]=useState('');
+ const router=useRouter();const [page,setPage]=useState<Page|null>(null);const [canEdit,setCanEdit]=useState(false);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [conflict,setConflict]=useState(false);const [saving,setSaving]=useState(false);const [force,setForce]=useState(0);const savingRef=useRef(false);const handledForce=useRef(0);const [persisted,setPersisted]=useState('');
  const [title,setTitle]=useState('');const [icon,setIcon]=useState('🌙');const [blocks,setBlocks]=useState<WorkspaceBlock[]>([]);const [data,setData]=useState<Record<string,unknown>>({});
  useEffect(()=>{let alive=true;(async()=>{try{const r=await fetch('/api/workspace/pages/'+id,{cache:'no-store'});const x=await r.json();if(!r.ok)throw Error(x.error||'Página não encontrada');if(!alive)return;const p=x.page as Page;const draft:Draft={title:p.title,icon:p.icon||'🌙',content:Array.isArray(p.content)?p.content as WorkspaceBlock[]:[],data:p.data&&typeof p.data==='object'&&!Array.isArray(p.data)?p.data as Record<string,unknown>:{}};
  setPage(p);setCanEdit(x.canEdit);setTitle(draft.title);setIcon(draft.icon);setBlocks(draft.content);setData(draft.data);setPersisted(JSON.stringify(draft));setError('');setConflict(false)}catch(e){if(alive)setError(e instanceof Error?e.message:'Falha ao abrir a página')}finally{if(alive)setLoading(false)}})();return()=>{alive=false}},[id]);
  const draft=useMemo<Draft>(()=>({title,icon,content:blocks,data}),[title,icon,blocks,data]);
  const dirty=!!page&&JSON.stringify(draft)!==persisted;
- useEffect(()=>{if(!page||!canEdit||conflict||!dirty)return;const json=JSON.stringify(draft);const t=setTimeout(async()=>{
+ useEffect(()=>{if(!page||!canEdit||conflict||!dirty)return;const json=JSON.stringify(draft);const immediate=force!==handledForce.current;const t=setTimeout(async()=>{
   if(savingRef.current)return;
+  handledForce.current=force;
   savingRef.current=true;setSaving(true);setError('');
   try{const r=await fetch('/api/workspace/pages/'+page.id,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({...draft,version:page.version})});const x=await r.json();if(!r.ok){if(r.status===409)setConflict(true);throw Error(x.error||'Erro ao salvar')};setPersisted(json);setPage(old=>old?{...old,version:x.page.version,revisions:[{id:'latest',version:x.page.version,createdAt:new Date().toISOString()},...old.revisions].slice(0,8)}:old)}
   catch(e){setError(e instanceof Error?e.message:'Falha de conexão')}finally{savingRef.current=false;setSaving(false)}
- },force?30:1300);return()=>clearTimeout(t)
+ },immediate?0:1300);return()=>clearTimeout(t)
  },[page,canEdit,conflict,dirty,draft,force]);
  useEffect(()=>{const onLeave=(e:BeforeUnloadEvent)=>{if(dirty){e.preventDefault();e.returnValue=''}};window.addEventListener('beforeunload',onLeave);return()=>window.removeEventListener('beforeunload',onLeave)},[dirty]);
  async function favorite(){if(!page)return;const r=await fetch('/api/workspace/pages/'+id+'/favorite',{method:'POST'});if(r.ok){const x=await r.json();setPage(p=>p?{...p,favorite:x.favorite}:p)}}
@@ -33,7 +34,7 @@ export function WorkspaceEditor({id}:{id:string}){
  return <div className="workspace-editor">
   {loading?<div className="panel p-10 muted">Abrindo a página...</div>:!page?<div className="panel p-10" role="alert">{error||'Página não encontrada'}</div>:<>
    <div className="flex items-center flex-wrap justify-between gap-3 mb-9">
-    <div className="flex gap-3 items-center"><Link href={'/app/espacos/'+page.departmentId} className="btn !p-2" aria-label="Voltar ao espaço"><ArrowLeft size={18}/></Link><div className="text-xs muted">Espaços / <span className="font-semibold">{page.kind==='PAGE'?'Página':page.kind==='SHEET'?'Planilha':page.kind==='FLOW'?'Fluxograma':'Banco de dados'}</span></div></div>
+    <div className="flex gap-3 items-center"><Link href={'/app/espacos/'+page.departmentId} onClick={e=>{if(dirty&&!window.confirm('Há alterações não salvas. Sair mesmo assim?'))e.preventDefault()}} className="btn !p-2" aria-label="Voltar ao espaço"><ArrowLeft size={18}/></Link><div className="text-xs muted">Espaços / <span className="font-semibold">{page.kind==='PAGE'?'Página':page.kind==='SHEET'?'Planilha':page.kind==='FLOW'?'Fluxograma':'Banco de dados'}</span></div></div>
     <div className="flex items-center gap-2 flex-wrap"><span className="text-xs muted flex items-center gap-1">{saving?<><Cloud size={15}/> Salvando...</>:dirty?<><CloudOff size={15}/> Alterações pendentes</>:<><Check size={15}/> Salvo na Neon</>}</span>
     <button className={'btn !p-2 '+(page.favorite?'moon-accent':'')} title="Favorito" onClick={favorite}><Star size={16} fill={page.favorite?'currentColor':'none'}/></button>
     {canEdit&&<button className="btn btn-primary" disabled={saving||!dirty||conflict} onClick={()=>setForce(x=>x+1)}>Salvar agora</button>}
