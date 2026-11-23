@@ -1,25 +1,10 @@
 'use client';
 import {useMemo,useState} from 'react';
 import {Download,Plus,Rows3,KanbanSquare,Table2,Trash2} from 'lucide-react';
-export type GridData={columns:string[];rows:string[][];view?:'table'|'board'};
+import {colName,calculateCell,toCSV} from '@/lib/sheet-math';
+import type {GridData} from '@/lib/sheet-math';
+export type {GridData} from '@/lib/sheet-math';
 type Props={value:GridData;onChange:(next:GridData)=>void;readOnly?:boolean;database?:boolean};
-const colName=(n:number)=>String.fromCharCode(65+n);
-export function calculateCell(rows:string[][],r:number,c:number,visited=new Set<string>()):string{
- const raw=rows[r]?.[c]||'';
- if(!raw.startsWith('='))return raw;
- const token=r+':'+c;
- if(visited.has(token))return '#CYCLE';
- const seen=new Set(visited);seen.add(token);
- const toNum=(s:string)=>{const match=s.match(/^([A-Z])(\d{1,3})$/);
-  if(match){const n=calculateCell(rows,Number(match[2])-1,match[1].charCodeAt(0)-65,seen);return Number(n.replace(',','.'))||0}
-  return Number(s.replace(',','.'))||0};
- const sum=raw.match(/^=SUM\(([A-Z])(\d{1,3}):([A-Z])(\d{1,3})\)$/i);
- if(sum){let total=0;for(let i=Number(sum[2])-1;i<Number(sum[4]);i++)for(let j=sum[1].toUpperCase().charCodeAt(0)-65;j<=sum[3].toUpperCase().charCodeAt(0)-65;j++)total+=toNum(colName(j)+(i+1));return String(Math.round(total*1e6)/1e6)}
- const math=raw.match(/^=\s*([A-Z]\d{1,3}|-?\d+(?:[.,]\d+)?)\s*([+\-*/])\s*([A-Z]\d{1,3}|-?\d+(?:[.,]\d+)?)\s*$/i);
- if(math){const a=toNum(math[1].toUpperCase()),b=toNum(math[3].toUpperCase());if(math[2]==='/'&&b===0)return '#DIV/0';const v=math[2]==='+'?a+b:math[2]==='-'?a-b:math[2]==='*'?a*b:a/b;return String(Math.round(v*1e6)/1e6)}
- return '#FÓRMULA';
-}
-function toCSV(x:GridData){return [x.columns,...x.rows].map(row=>row.map(v=>'"'+v.replaceAll('"','""')+'"').join(';')).join('\r\n')}
 export function WorkspaceSheet({value,onChange,readOnly=false,database=false}:Props){
  const [filter,setFilter]=useState('');const columns=value.columns;const rows=value.rows;const view=value.view||'table';
  const filtered=useMemo(()=>rows.map((row,i)=>({row,i})).filter(x=>x.row.join(' ').toLowerCase().includes(filter.toLowerCase())),[rows,filter]);

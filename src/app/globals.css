@@ -76,7 +76,7 @@ button:disabled {opacity:.45;cursor:not-allowed}
 .workspace-icon-input {background:var(--soft);color:var(--accent);border:none;width:65px;height:65px;text-align:center;font-size:34px;border-radius:15px}
 .workspace-title-input {background:transparent;border:none;outline:none;color:var(--ink);width:100%;font-size:clamp(25px,3vw,40px);font-weight:850;letter-spacing:-.055em}
 .workspace-page-body {padding:30px 42px 54px}
-.workspace-block-row {position:relative;display:flex;align-items:flex-start;gap:10px}
+.workspace-block-row {position:relative;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .block-actions {display:flex;gap:1px;width:96px;flex:none;padding-top:8px;justify-content:flex-end;opacity:.23;transition:opacity .16s}
 .workspace-block-row:hover .block-actions,.block-actions:focus-within {opacity:1}
 .block-actions button {color:var(--muted);padding:3px;border-radius:5px}
@@ -86,7 +86,7 @@ button:disabled {opacity:.45;cursor:not-allowed}
 .block-textarea {width:100%;min-height:44px;padding:6px 4px;line-height:1.6;overflow:hidden}
 .block-heading textarea {font-size:22px;font-weight:750;letter-spacing:-.03em}
 .block-quote {border-left:3px solid var(--accent);padding-left:13px;margin-left:4px}
-.block-chooser {position:relative;z-index:3;background:var(--panel-alt);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:12px;margin:12px 0 12px 10px}
+.block-chooser {position:relative;z-index:3;flex-basis:100%;background:var(--panel-alt);border:1px solid var(--edge);box-shadow:var(--shadow);border-radius:12px;margin:12px 0 12px 10px}
 .block-chooser-option {display:flex;gap:8px;align-items:center;color:var(--ink);font-size:12px;text-align:left;padding:9px;border-radius:8px}
 .block-chooser-option:hover {background:var(--soft)}
 .workspace-grid-overflow {overflow:auto;max-width:100%;border:1px solid var(--edge);border-radius:11px}
