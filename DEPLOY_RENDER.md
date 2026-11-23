@@ -21,7 +21,7 @@ Em 2026-11-22, o Render confirmou a atualização Gato 2.0 (`dad8121`, deploy `d
 
 ## Verificações antes do uso
 
-- Acesse `https://gato-atletica-os.onrender.com/api/health` e valide resposta HTTP.
+- Acesse `https://gato-atletica-os.onrender.com/api/health` e valide resposta HTTP (200 e database connected verificados no deploy `dep-dc1ops7f3r2c73dajqu0`).
 - Verifique que `/login` renderiza uma página real.
 - A conta administrativa inicial existe. Rotacione qualquer senha temporária exposta em chats; valide cookies Secure, login/logout e RBAC.
 - Exercite CRUD de eventos, membros, financeiro e fluxo disciplinar com contas distintas; revise os espaços e as páginas na interface lunar após o deploy.
