@@ -143,4 +143,3 @@ test('QA: financeiro, ocorrências, documentos e isolamento entre diretorias', {
   expect(await outsider('/api/documents/'+id+'/download'),403,'outsider cannot download PDF');
  });
 });
-
