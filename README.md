@@ -1,4 +1,4 @@
-<p align="center"><img src="public/gato-lunar.svg" width="112" alt="Gato, a lunar cat with glasses" /></p>
+<p align="center"><img src="assets/das-animated-icon.svg" alt="Gato animated project emblem" width="122" /></p>
 
 <h1 align="center">Gato ☾</h1>
 
